@@ -92,7 +92,28 @@ export class EventsService {
 
   @Get('events')
   async getEventsWithWorkshops() {
-    throw new Error('TODO task 1');
+    const events = await this.eventRepository.query(`
+      select
+        e.id,
+        e.name,
+        e.createdAt
+      from event e
+    `);
+
+    return Promise.all(
+      events.map(async (event: any) => {
+        event.workshops = await this.eventRepository.query(
+          `
+        select
+          *
+        from workshop
+        where eventId = $1
+        `,
+          event.id,
+        );
+        return event;
+      }),
+    );
   }
 
   /*
