@@ -183,6 +183,34 @@ export class EventsService {
      */
   @Get('futureevents')
   async getFutureEventWithWorkshops() {
-    throw new Error('TODO task 2');
+    const events = await this.eventRepository.query(`
+      select
+        e.id,
+        e.name,
+        e.createdAt
+      from event e
+      left join (
+        select
+          *
+        from workshop
+        order by id asc
+      ) wo on e.id = wo.eventId
+      where date('now') < date(wo.start)
+    `);
+
+    return Promise.all(
+      events.map(async (event: any) => {
+        event.workshops = await this.eventRepository.query(
+          `
+        select
+          *
+        from workshop
+        where eventId = $1
+        `,
+          event.id,
+        );
+        return event;
+      }),
+    );
   }
 }
