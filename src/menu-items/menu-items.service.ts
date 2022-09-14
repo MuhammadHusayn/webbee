@@ -84,6 +84,17 @@ export class MenuItemsService {
     ]
   */
   async getMenuItems() {
-    throw new Error('TODO in task 3');
+      return this.menuItemRepository.query(`
+      with recursive menus (id, name, url, parentId, createdAt, array_data) AS (
+        select m.id, m.name, m.url, m.parentId, m.createdAt, null as array_data
+        from menu_item m
+        where m.parentId is null
+        union all
+        select m.id, m.name, m.url, m.parentId, m.createdAt,
+        json_group_array(m.name) array_data
+        from menu_item m
+        join menus ON menus.id = m.parentId
+    ) select * from menus
+    `);
   }
 }

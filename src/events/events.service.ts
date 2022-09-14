@@ -184,7 +184,7 @@ export class EventsService {
   @Get('futureevents')
   async getFutureEventWithWorkshops() {
     const events = await this.eventRepository.query(`
-      select
+      select distinct
         e.id,
         e.name,
         e.createdAt
